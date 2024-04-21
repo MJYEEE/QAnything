@@ -110,12 +110,13 @@ services:
             - driver: nvidia
               count: "all"
               capabilities: ["gpu"]
-
+    # 这行定义了容器启动时执行的命令。它首先检查环境变量LLM_API的值，如果为"local"，则执行run_for_local_option.sh脚本，否则执行run_for_cloud_option.sh脚本。
+    # 然后进入一个无限循环，每5秒执行一次。
     command: /bin/bash -c 'if [ "${LLM_API}" = "local" ]; then /workspace/qanything_local/scripts/run_for_local_option.sh -c $LLM_API -i $DEVICE_ID -b $RUNTIME_BACKEND -m $MODEL_NAME -t $CONV_TEMPLATE -p $TP -r $GPU_MEM_UTILI; else /workspace/qanything_local/scripts/run_for_cloud_option.sh -c $LLM_API -i $DEVICE_ID -b $RUNTIME_BACKEND; fi; while true; do sleep 5; done'
 
     privileged: true
-    shm_size: '8gb'
-    volumes:
+    shm_size: '8gb' # 这里设置了容器共享内存的大小为8GB。
+    volumes: #这部分定义了数据卷，用于将主机上的目录挂载到容器中。
       - ${DOCKER_VOLUME_DIRECTORY:-.}/assets/custom_models:/model_repos/CustomLLM
       - ${DOCKER_VOLUME_DIRECTORY:-.}/:/workspace/qanything_local/
     ports:
